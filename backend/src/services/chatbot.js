@@ -172,6 +172,15 @@ function reply({ message, context = {}, user }) {
     };
   }
 
+  // Remembered flower but nothing recognisable asked: don't guess an answer.
+  if (flower && !mentioned && intents.length === 0 && !findProblem(text)) {
+    return {
+      reply: `I didn’t quite catch that. 🌱 Are you still asking about ${flower.name}? Try one of the questions below, or name another plant.`,
+      suggestions: suggestionsFor(flower),
+      context: { flowerSlug: flower.slug },
+    };
+  }
+
   if (flower) {
     return {
       reply: answerForFlower(flower, intents, text, city),

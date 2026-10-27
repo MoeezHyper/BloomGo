@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { useWindowDimensions, View } from 'react-native';
 import { FlowerCard } from '@/components/flowers';
 import { Gutter, Page, TopBar } from '@/components/layout';
-import { EmptyState, FadeIn, Loading, T } from '@/components/ui';
+import { EmptyState, ErrorState, FadeIn, Loading, T } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useFetch } from '@/hooks/useFetch';
 import type { FlowerSummary } from '@/lib/types';
@@ -13,7 +13,7 @@ export default function Favorites() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const { user } = useAuth();
-  const { data, loading, reload } = useFetch<{ flowers: FlowerSummary[] }>('/flowers/favorites/list');
+  const { data, loading, error, reload } = useFetch<{ flowers: FlowerSummary[] }>('/flowers/favorites/list');
   useFocusEffect(
     useCallback(() => {
       reload();
@@ -33,6 +33,8 @@ export default function Favorites() {
         <T variant="body" color={colors.muted} style={{ marginBottom: 20 }}>{flowers.length} saved</T>
         {loading && !data ? (
           <Loading />
+        ) : error && !data ? (
+          <ErrorState message={error} onRetry={reload} />
         ) : flowers.length === 0 ? (
           <EmptyState icon="heart-outline" title="No favourites yet" text="Tap the heart on any flower to save it here." action="Browse the library" onAction={() => router.push(explore as any)} />
         ) : (

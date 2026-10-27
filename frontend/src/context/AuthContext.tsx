@@ -4,6 +4,8 @@ import { api, setAuthToken } from '@/lib/api';
 import type { Role, User } from '@/lib/types';
 
 const TOKEN_KEY = 'shgds.token';
+// Last known profile, so a signed-in user stays signed in when the API is unreachable.
+const USER_KEY = 'shgds.user';
 
 type AuthResult = { token: string; user: User };
 type RegisterInput = { name: string; email: string; phone: string; password: string; role: Role; city: string };
@@ -36,16 +38,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(user);
         }
       } catch (e: any) {
-        // A rejected token means sign in again; a network error keeps the token for next launch.
+        // A rejected token means sign in again; a network error falls back to the cached profile.
         if (e?.status === 401 || e?.status === 403) {
           await SecureStore.deleteItemAsync(TOKEN_KEY);
+          await SecureStore.deleteItemAsync(USER_KEY);
           setAuthToken(null);
+        } else {
+          const cached = await SecureStore.getItemAsync(USER_KEY).catch(() => null);
+          if (cached) setUser(JSON.parse(cached));
         }
       } finally {
         setReady(true);
       }
     })();
   }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    (user ? SecureStore.setItemAsync(USER_KEY, JSON.stringify(user)) : SecureStore.deleteItemAsync(USER_KEY)).catch(() => {});
+  }, [user, ready]);
 
   const acceptSession = useCallback(async ({ token, user }: AuthResult) => {
     await SecureStore.setItemAsync(TOKEN_KEY, token);

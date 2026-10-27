@@ -8,6 +8,8 @@ const { AVATAR_COLORS } = require('../data/seedUsers');
 const { cityById } = require('../data/cities');
 const { DEMO_MODE, RESET_CODE_TTL_MS } = require('../config');
 
+const RESEND_COOLDOWN_MS = 60 * 1000;
+
 const router = express.Router();
 const findByEmail = (email) => db.data.users.find((u) => u.email === String(email || '').trim().toLowerCase());
 
@@ -42,6 +44,7 @@ router.post('/register', (req, res) => {
         : { skills: [], experienceYears: 0, serviceAreas: [city], availableDays: [], hours: '', bio: '', rate: 0 },
     favorites: [],
     createdAt: new Date().toISOString(),
+    lastLoginAt: new Date().toISOString(),
     passwordHash: bcrypt.hashSync(password, 10),
   };
   db.data.users.push(user);
@@ -68,10 +71,15 @@ router.post('/forgot-password', (req, res) => {
   if (!EMAIL_RE.test(email)) return res.status(400).json({ error: 'Please enter a valid email address.' });
   const user = findByEmail(email);
   const response = { message: 'If an account exists for this email, a 6-digit reset code has been sent.' };
-  if (user) {
+  // Suspended accounts get the same generic reply but no code.
+  if (user && user.status !== 'suspended') {
+    const previous = db.data.resetCodes.find((c) => c.email === email);
+    if (previous?.createdAt && Date.now() - previous.createdAt < RESEND_COOLDOWN_MS) {
+      return res.status(429).json({ error: 'A code was sent a moment ago. Please wait a minute before requesting another.' });
+    }
     const code = String(crypto.randomInt(100000, 1000000));
     db.data.resetCodes = db.data.resetCodes.filter((c) => c.email !== email);
-    db.data.resetCodes.push({ email, codeHash: bcrypt.hashSync(code, 8), expiresAt: Date.now() + RESET_CODE_TTL_MS, attempts: 0 });
+    db.data.resetCodes.push({ email, codeHash: bcrypt.hashSync(code, 8), createdAt: Date.now(), expiresAt: Date.now() + RESET_CODE_TTL_MS, attempts: 0 });
     db.save();
     console.log(`[auth] Password reset code for ${email}: ${code}`);
     if (DEMO_MODE) response.demoCode = code;
@@ -93,6 +101,8 @@ router.post('/reset-password', (req, res) => {
   const pwErr = passwordProblem(password);
   if (pwErr) return res.status(400).json({ error: pwErr });
   const user = findByEmail(email);
+  if (!user) return res.status(400).json({ error: 'This code has expired. Please request a new one.' });
+  if (user.status === 'suspended') return res.status(403).json({ error: 'This account has been suspended. Contact support.' });
   user.passwordHash = bcrypt.hashSync(password, 10);
   db.data.resetCodes = db.data.resetCodes.filter((c) => c.email !== email);
   db.save();

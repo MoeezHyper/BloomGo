@@ -98,8 +98,12 @@ function buildTips(w, city) {
   if (current.humidity < 30) tips.push({ icon: 'leaf', tone: 'warm', title: 'Dry air', text: 'Mist indoor plants and group pots together to raise humidity.' });
 
   const season = seasonFor(new Date().getMonth() + 1, city.zone);
+  const winter = {
+    highland: 'Winter in the hills: most beds rest. Protect pots from frost and plan spring bulbs.',
+    coastal: 'Mild coastal winters are peak bloom time — deadhead annuals weekly and feed roses every 2–3 weeks.',
+  }[city.zone] ?? 'Winter is peak bloom time in the plains — deadhead annuals weekly and feed roses every 2–3 weeks.';
   const seasonal = {
-    winter: 'Winter is peak bloom time in the plains — deadhead annuals weekly and feed roses every 2–3 weeks.',
+    winter,
     spring: 'Spring is the time to repot, prune summer shrubs and sow summer annuals like zinnia and sunflower.',
     summer: 'In summer, mulch generously and water early. Pause pruning and heavy feeding until the heat breaks.',
     monsoon: 'Monsoon is great for cuttings and planting shrubs, but watch drainage and spray neem against pests.',

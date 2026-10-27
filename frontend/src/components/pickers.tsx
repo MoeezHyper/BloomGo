@@ -64,27 +64,41 @@ export function CityField({ value, onChange, label = 'City', style }: { value: s
 export function CitySheet({ visible, value, onClose, onSelect }: { visible: boolean; value: string; onClose: () => void; onSelect: (id: string) => void }) {
   const toast = useToast();
   const [locating, setLocating] = useState(false);
+  // Shown inside the sheet: toasts render underneath the modal.
+  const [note, setNote] = useState<{ text: string; error?: boolean } | null>(null);
+
+  async function currentPosition() {
+    // Emulators and indoor phones can wait forever for a fresh fix, so prefer
+    // a recent known position and cap the fresh request at 10 seconds.
+    const last = await Location.getLastKnownPositionAsync({ maxAge: 15 * 60 * 1000 });
+    if (last) return last;
+    return Promise.race([
+      Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Couldn’t get a GPS fix. Please pick your city below.')), 10000)),
+    ]);
+  }
 
   async function useLocation() {
     setLocating(true);
+    setNote(null);
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        toast('Location permission was not granted.', 'error');
+        setNote({ text: 'Location permission was not granted. Please pick your city below.', error: true });
         return;
       }
-      const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      const pos = await currentPosition();
       const r = await api<{ city: { id: string; name: string }; distanceKm: number; supported: boolean }>('/seasonal/nearest', {
         query: { lat: pos.coords.latitude, lon: pos.coords.longitude },
       });
       if (!r.supported) {
-        toast(`You seem to be outside Pakistan (${r.distanceKm} km from ${r.city.name}). Please pick a city.`, 'info');
+        setNote({ text: `You seem to be outside Pakistan (${r.distanceKm} km from ${r.city.name}). Please pick a city.`, error: true });
         return;
       }
       toast(`Location found: ${r.city.name}`);
       onSelect(r.city.id);
     } catch (e: any) {
-      toast(e.message || 'Could not get your location.', 'error');
+      setNote({ text: e.message || 'Could not get your location.', error: true });
     } finally {
       setLocating(false);
     }
@@ -96,6 +110,12 @@ export function CitySheet({ visible, value, onClose, onSelect }: { visible: bool
         {locating ? <ActivityIndicator color={colors.forest} /> : <Ionicons name="navigate" size={18} color={colors.forest} />}
         <T variant="bodyStrong" color={colors.forest}>Use my current location</T>
       </Tap>
+      {note && (
+        <View style={styles.note}>
+          <Ionicons name="alert-circle-outline" size={16} color={colors.danger} />
+          <T variant="caption" color={colors.danger} style={{ flex: 1 }}>{note.text}</T>
+        </View>
+      )}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 6 }}>
         {CITIES.map((c) => {
           const active = c.id === value;
@@ -134,6 +154,7 @@ const styles = StyleSheet.create({
   optionIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   check: { position: 'absolute', top: 12, right: 12, width: 22, height: 22, borderRadius: 11, backgroundColor: colors.forest, alignItems: 'center', justifyContent: 'center' },
   field: { height: 54, borderRadius: radius.md, borderWidth: 1.2, borderColor: colors.line, backgroundColor: colors.surface, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  note: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 12, backgroundColor: colors.dangerSoft, marginBottom: 12 },
   locate: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 16, borderRadius: radius.md, backgroundColor: colors.sageSoft, marginBottom: 12 },
   cityChip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.surface },
   seg: { flexDirection: 'row', backgroundColor: colors.surfaceAlt, borderRadius: 14, padding: 4 },

@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { FeatureCard, MatchRing } from '@/components/flowers';
 import { Gutter, Page } from '@/components/layout';
-import { Avatar, Button, Card, FadeIn, Pill, SectionHeader, T, Tap } from '@/components/ui';
+import { Avatar, Button, Card, ErrorState, FadeIn, Pill, SectionHeader, T, Tap } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useFetch } from '@/hooks/useFetch';
 import { heroImage, imageUrl } from '@/lib/api';
@@ -49,6 +49,14 @@ export default function CustomerHome() {
           <Avatar name={user?.name ?? ''} color={user?.avatarColor} size={46} />
         </Tap>
       </Gutter>
+
+      {rec.error && !rec.data && (
+        <Gutter style={{ marginBottom: 14 }}>
+          <Card>
+            <ErrorState message={rec.error} onRetry={() => { rec.refresh(); weather.refresh(); }} />
+          </Card>
+        </Gutter>
+      )}
 
       {/* Hero */}
       <FadeIn>
@@ -167,7 +175,7 @@ export default function CustomerHome() {
             </View>
           </Tap>
         ))}
-        {!rec.data && [0, 1].map((i) => <View key={i} style={[styles.pick, { width: width * 0.58, backgroundColor: colors.surfaceAlt }]} />)}
+        {!rec.data && !rec.error && [0, 1].map((i) => <View key={i} style={[styles.pick, { width: width * 0.58, backgroundColor: colors.surfaceAlt }]} />)}
       </ScrollView>
 
       {/* Services preview */}

@@ -32,7 +32,6 @@ export default function ResetPassword() {
       const r = await api<{ message: string; token: string; user: User }>('/auth/reset-password', { method: 'POST', body: { email, code, password } });
       const user = await acceptSession(r);
       toast('Password updated — you’re signed in.');
-      router.dismissAll();
       router.replace(homeFor(user.role));
     } catch (e: any) {
       setError(e.message);

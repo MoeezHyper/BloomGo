@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { Gutter, Page } from '@/components/layout';
-import { Avatar, Button, Card, FadeIn, Pill, SectionHeader, T, Tap } from '@/components/ui';
+import { Avatar, Button, Card, ErrorState, FadeIn, Pill, SectionHeader, T, Tap } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useFetch } from '@/hooks/useFetch';
 import { heroImage, imageUrl } from '@/lib/api';
@@ -123,6 +123,14 @@ export default function ProDashboard() {
           <T variant="bodyStrong" style={{ marginTop: 4 }}>{p?.serviceAreas.map(cityName).join(', ') || '—'}</T>
         </Card>
       </Gutter>
+
+      {rec.error && !rec.data && (
+        <Gutter style={{ marginTop: 28 }}>
+          <Card>
+            <ErrorState message={rec.error} onRetry={rec.refresh} />
+          </Card>
+        </Gutter>
+      )}
 
       {rec.data && (
         <>

@@ -2,7 +2,8 @@ const { FLOWERS } = require('../data/flowers');
 const { flowerCalendar, formatMonths, MONTH_NAMES, seasonFor } = require('./seasons');
 const { ZONES } = require('../data/cities');
 
-const SPACE_LABEL = { indoor: 'indoors', balcony: 'balcony', rooftop: 'rooftop', lawn: 'lawn' };
+// Phrases that read naturally after "Grows well …" / "Not ideal …".
+const SPACE_WHERE = { indoor: 'indoors', balcony: 'on a balcony', rooftop: 'on a rooftop', lawn: 'in lawn beds' };
 const SUN_LABEL = { full: '6+ hours of sun', partial: '3–6 hours of sun', shade: 'bright shade' };
 const DEFAULT_GARDEN = { spaceType: 'balcony', sunlight: 'full', experience: 'beginner', hasPets: false, preferredColors: [] };
 
@@ -54,11 +55,11 @@ function scoreFlower(flower, city, month, garden) {
 
   if (flower.spaces.includes(g.spaceType)) {
     score += 20;
-    reasons.push(`Grows well on a ${SPACE_LABEL[g.spaceType]}`);
+    reasons.push(`Grows well ${SPACE_WHERE[g.spaceType]}`);
   } else if (flower.potFriendly && g.spaceType !== 'indoor') {
     score += 10;
   } else {
-    warnings.push(`Not ideal for a ${SPACE_LABEL[g.spaceType]} space`);
+    warnings.push(`Not ideal ${SPACE_WHERE[g.spaceType]}`);
   }
   if (g.size === 'small' && flower.heightCm > 150) {
     score -= 8;

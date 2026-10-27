@@ -56,7 +56,7 @@ export default function Seasonal() {
       tabBar
       edgeTop={false}
       scrollEventThrottle={32}
-      onScroll={(e) => setScrolled(e.nativeEvent.contentOffset.y > 380)}
+      onScroll={(e) => setScrolled(e.nativeEvent.contentOffset.y > 60)}
       overlay={<StatusScrim visible={scrolled} />}
       refreshing={rec.refreshing} onRefresh={() => { rec.refresh(); weather.refresh(); }}>
       {focused && <StatusBar style={scrolled ? 'dark' : 'light'} />}

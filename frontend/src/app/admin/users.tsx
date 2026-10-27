@@ -54,7 +54,7 @@ export default function AdminUsers() {
           <EmptyState icon="people-outline" title="No users found" text="Try a different search or filter." />
         ) : (
           <>
-            <T variant="caption" style={{ marginBottom: 10 }}>{data.users.length} users</T>
+            <T variant="caption" style={{ marginBottom: 10 }}>{data.users.length} {data.users.length === 1 ? 'user' : 'users'}</T>
             <Card padded={false}>
               {data.users.map((u, i) => (
                 <FadeIn key={u.id} delay={Math.min(i, 10) * 30}>

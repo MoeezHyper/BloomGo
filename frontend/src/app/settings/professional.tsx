@@ -27,7 +27,7 @@ export default function ProfessionalProfile() {
   const [areas, setAreas] = useState<string[]>(p?.serviceAreas ?? [user?.city ?? 'lahore']);
   const [days, setDays] = useState<string[]>(p?.availableDays ?? []);
   const [hours, setHours] = useState(p?.hours ?? '');
-  const [years, setYears] = useState(String(p?.experienceYears ?? ''));
+  const [years, setYears] = useState(p?.experienceYears ? String(p.experienceYears) : '');
   const [rate, setRate] = useState(p?.rate ? String(p.rate) : '');
   const [bio, setBio] = useState(p?.bio ?? '');
   const [saving, setSaving] = useState(false);
