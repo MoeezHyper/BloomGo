@@ -1,0 +1,19 @@
+{
+  "name": "smart-home-gardening-and-decoration-system",
+  "version": "1.0.0",
+  "description": "Smart Home Gardening and Decoration System — React Native (Expo) app + Node.js API",
+  "private": true,
+  "scripts": {
+    "postinstall": "npm install --prefix backend && npm install --prefix frontend",
+    "start": "node scripts/dev.js",
+    "dev": "node scripts/dev.js",
+    "backend": "npm run dev --prefix backend",
+    "frontend": "npm start --prefix frontend",
+    "emulator": "node scripts/dev.js --emulator-only",
+    "typecheck": "npm run typecheck --prefix frontend",
+    "reset-db": "npm run reset --prefix backend"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
