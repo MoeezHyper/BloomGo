@@ -22,7 +22,7 @@ export default function AddressForm() {
     label: existing?.label ?? 'Home',
     line1: existing?.line1 ?? '',
     area: existing?.area ?? '',
-    city: existing?.city ?? user?.city ?? 'lahore',
+    city: existing?.city ?? user?.city ?? 'islamabad',
     notes: existing?.notes ?? '',
     isDefault: existing?.isDefault ?? (user?.addresses.length ?? 0) === 0,
   });

@@ -9,7 +9,7 @@ const router = express.Router();
 router.use(optionalAuth);
 
 const resolveCity = (req) =>
-  cityById(req.query.city) || cityById(req.user?.garden?.city) || cityById(req.user?.city) || cityById('lahore');
+  cityById(req.query.city) || cityById(req.user?.garden?.city) || cityById(req.user?.city) || cityById('islamabad');
 
 router.get('/cities', (_req, res) => {
   res.json({

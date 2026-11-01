@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { FlowerCard } from '@/components/flowers';
 import { Gutter, Page, Sheet } from '@/components/layout';
 import { Button, Chip, EmptyState, ErrorState, FadeIn, Input, Loading, Pill, T, Tap } from '@/components/ui';
@@ -10,7 +10,7 @@ import { COLOR_SWATCH, DIFFICULTY_LABEL, SPACE_META, SUN_META } from '@/lib/cons
 import type { FlowerSummary } from '@/lib/types';
 import { colors, space } from '@/theme';
 
-const CATEGORIES = ['All', 'Annual', 'Perennial', 'Shrub', 'Climber', 'Bulb', 'Indoor'];
+const CATEGORIES = ['All', 'Garden flowers', 'Indoor plants', 'Fresh bouquets', 'Bulb', 'Climber'];
 
 type Filters = { sunlight?: string; difficulty?: string; space?: string; color?: string; petSafe?: boolean; fragrant?: boolean; inSeason?: boolean };
 
@@ -29,16 +29,24 @@ export default function ExploreScreen() {
     return () => clearTimeout(t);
   }, [search]);
 
+  // Friendly chips → API filters.
+  const chipQuery = useMemo(() => {
+    if (category === 'Garden flowers') return { outdoor: 'true' };
+    if (category === 'Indoor plants') return { category: 'Indoor' };
+    if (category === 'Fresh bouquets') return { use: 'bouquet' };
+    return category === 'All' ? {} : { category };
+  }, [category]);
+
   const query = useMemo(
     () => ({
       q,
-      category: category === 'All' ? undefined : category,
+      ...chipQuery,
       ...filters,
       petSafe: filters.petSafe ? 'true' : undefined,
       fragrant: filters.fragrant ? 'true' : undefined,
       inSeason: filters.inSeason ? 'true' : undefined,
     }),
-    [q, category, filters]
+    [q, chipQuery, filters]
   );
   const { data, loading, error, refresh, refreshing } = useFetch<{ total: number; city: { name: string }; flowers: FlowerSummary[] }>('/flowers', query as any);
   const activeCount = Object.values(filters).filter(Boolean).length;
@@ -49,17 +57,28 @@ export default function ExploreScreen() {
   return (
     <Page tabBar refreshing={refreshing} onRefresh={refresh} stickyHeaderIndices={[1]}>
       <Gutter>
-        <T variant="eyebrow">The flower library</T>
-        <T variant="display" style={{ marginTop: 6 }}>Find your next{'\n'}favourite.</T>
-        <T variant="body" color={colors.muted} style={{ marginTop: 6 }}>
-          Extraordinary blooms and care guides{user ? `, matched to ${data?.city.name ?? 'your city'}` : ''}.
-        </T>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <View style={{ flex: 1 }}>
+            <T variant="eyebrow" style={{ color: colors.forestSoft }}>The flower library</T>
+            <T variant="display" style={{ marginTop: 6, fontSize: 34, lineHeight: 40 }}>
+              Find your next{'\n'}favorite.
+            </T>
+            <T variant="body" color={colors.muted} style={{ marginTop: 6 }}>
+              Extraordinary blooms and beautiful greenery, thoughtfully selected.
+            </T>
+          </View>
+          <View style={styles.greenWorldPill}>
+            <Ionicons name="leaf-outline" size={12} color={colors.forest} />
+            <Text style={styles.greenWorldText}>Your green world</Text>
+          </View>
+        </View>
       </Gutter>
 
       <View style={{ backgroundColor: colors.bg, paddingTop: 18, paddingBottom: 10 }}>
         <Gutter style={{ flexDirection: 'row', gap: 10 }}>
           <Input
             style={{ flex: 1 }}
+            pill
             icon="search-outline"
             placeholder="Find something lovely…"
             value={search}
@@ -75,7 +94,7 @@ export default function ExploreScreen() {
             style={[styles.filterBtn, activeCount > 0 && { backgroundColor: colors.forest, borderColor: colors.forest }]}
             scaleTo={0.92}
           >
-            <Ionicons name="options-outline" size={21} color={activeCount ? colors.white : colors.forest} />
+            <Ionicons name="options-outline" size={20} color={activeCount ? colors.white : colors.forest} />
             {activeCount > 0 && (
               <View style={styles.badge}>
                 <T style={{ fontSize: 10, color: colors.forest, fontFamily: 'DMSans_700Bold' }}>{activeCount}</T>
@@ -180,4 +199,16 @@ const styles = StyleSheet.create({
   badge: { position: 'absolute', top: 8, right: 8, width: 16, height: 16, borderRadius: 8, backgroundColor: colors.sage, alignItems: 'center', justifyContent: 'center' },
   countRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, minHeight: 28 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 22 },
+  greenWorldPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: colors.sageSoft,
+    borderWidth: 1,
+    borderColor: colors.sage,
+  },
+  greenWorldText: { fontFamily: 'DMSans_500Medium', fontSize: 11, color: colors.forest },
 });

@@ -37,7 +37,7 @@ export default function GardenProfile() {
   const { onboarding } = useLocalSearchParams<{ onboarding?: string }>();
   const g = user?.garden;
   const [form, setForm] = useState<Garden>({
-    city: g?.city ?? user?.city ?? 'lahore',
+    city: g?.city ?? user?.city ?? 'islamabad',
     spaceType: g?.spaceType ?? 'balcony',
     size: g?.size ?? 'small',
     sunlight: g?.sunlight ?? 'full',

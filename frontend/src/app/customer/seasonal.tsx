@@ -31,7 +31,7 @@ export default function Seasonal() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const [city, setCity] = useState(user?.garden?.city ?? user?.city ?? 'lahore');
+  const [city, setCity] = useState(user?.garden?.city ?? user?.city ?? 'islamabad');
   const [spaceType, setSpaceType] = useState<SpaceType | undefined>(user?.garden?.spaceType);
   const [tab, setTab] = useState<'blooming' | 'sowNow' | 'comingSoon'>('blooming');
   const [pickCity, setPickCity] = useState(false);

@@ -24,7 +24,7 @@ const summary = (f) => ({
   spaces: f.spaces,
 });
 
-const userCity = (req) => cityById(req.query.city) || cityById(req.user?.garden?.city) || cityById(req.user?.city) || cityById('lahore');
+const userCity = (req) => cityById(req.query.city) || cityById(req.user?.garden?.city) || cityById(req.user?.city) || cityById('islamabad');
 
 router.get('/meta/filters', (_req, res) => {
   const uniq = (arr) => [...new Set(arr)];
@@ -37,23 +37,36 @@ router.get('/meta/filters', (_req, res) => {
   });
 });
 
-// Search + filters: q, category, color, sunlight, difficulty, space, petSafe, fragrant, inSeason
+// Search + filters: q, category, color, sunlight, difficulty, space, use, outdoor, petSafe, fragrant, inSeason
 router.get('/', optionalAuth, (req, res) => {
-  const { q, category, color, sunlight, difficulty, space, petSafe, fragrant, inSeason } = req.query;
+  const { q, category, color, sunlight, difficulty, space, use, outdoor, petSafe, fragrant, inSeason } = req.query;
   const term = String(q || '').trim().toLowerCase();
   const city = userCity(req);
   const month = new Date().getMonth() + 1;
   let list = FLOWERS;
   if (term) {
-    list = list.filter((f) =>
-      [f.name, f.localName, f.scientificName, f.tagline, f.category, ...f.colors].some((s) => s && s.toLowerCase().includes(term))
-    );
+    // Rank so "rose" shows Rose first, then names containing it, then other fields (e.g. Catharanthus roseus).
+    const rank = (f) => {
+      const names = [f.name, f.localName].filter(Boolean).map((s) => s.toLowerCase());
+      if (names.some((s) => s === term)) return 0;
+      if (names.some((s) => s.startsWith(term))) return 1;
+      if (names.some((s) => s.includes(term))) return 2;
+      if ([f.scientificName, f.tagline, f.category, ...f.colors].some((s) => s && s.toLowerCase().includes(term))) return 3;
+      return -1;
+    };
+    list = list
+      .map((f) => [f, rank(f)])
+      .filter(([, r]) => r >= 0)
+      .sort((a, b) => a[1] - b[1])
+      .map(([f]) => f);
   }
   if (category) list = list.filter((f) => f.category === category);
   if (color) list = list.filter((f) => f.colors.includes(color));
   if (sunlight) list = list.filter((f) => f.sunlight === sunlight);
   if (difficulty) list = list.filter((f) => f.difficulty === difficulty);
   if (space) list = list.filter((f) => f.spaces.includes(space));
+  if (use) list = list.filter((f) => f.uses.includes(use));
+  if (outdoor === 'true') list = list.filter((f) => !f.indoor);
   if (petSafe === 'true') list = list.filter((f) => !f.toxicToPets);
   if (fragrant === 'true') list = list.filter((f) => f.fragrant);
 
@@ -68,7 +81,12 @@ router.get('/', optionalAuth, (req, res) => {
 });
 
 router.get('/favorites/list', requireAuth, (req, res) => {
-  const flowers = req.user.favorites.map(flowerBySlug).filter(Boolean).map((f) => ({ ...summary(f), isFavorite: true }));
+  const city = userCity(req);
+  const month = new Date().getMonth() + 1;
+  const flowers = req.user.favorites
+    .map(flowerBySlug)
+    .filter(Boolean)
+    .map((f) => ({ ...summary(f), inSeason: flowerCalendar(f, city).bloom.includes(month), isFavorite: true }));
   res.json({ flowers });
 });
 

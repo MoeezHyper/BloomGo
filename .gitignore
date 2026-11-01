@@ -5,3 +5,8 @@ backend/data/
 .DS_Store
 .env
 .env*.local
+.idea/
+.firebase-emulator/
+firebase-debug.log
+ui-debug.log
+backend/service-account*.json

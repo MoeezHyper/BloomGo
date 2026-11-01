@@ -3,23 +3,26 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AuthShell } from '@/components/AuthShell';
+import { GoogleButton, OrDivider } from '@/components/GoogleButton';
 import { CityField } from '@/components/pickers';
 import { Button, Input, T, Tap } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
-import { homeFor, ROLE_META } from '@/lib/constants';
+import { ROLE_META } from '@/lib/constants';
+import { goHomeAfterSignUp } from '@/lib/navigation';
 import type { Role } from '@/lib/types';
 import { colors, fonts, radius } from '@/theme';
 
 const ROLES: Role[] = ['customer', 'gardener', 'decorator'];
 
 function strength(pw: string) {
-  let s = 0;
-  if (pw.length >= 8) s++;
+  if (pw.length < 6) return 0;
+  let s = 1;
   if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
   if (/\d/.test(pw)) s++;
   if (/[^A-Za-z0-9]/.test(pw)) s++;
-  return s;
+  if (pw.length >= 10) s++;
+  return Math.min(s, 4);
 }
 const STRENGTH = [
   { label: 'Too short', color: colors.danger },
@@ -35,7 +38,7 @@ export default function Register() {
   const toast = useToast();
   const [step, setStep] = useState<1 | 2>(1);
   const [role, setRole] = useState<Role>('customer');
-  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', city: 'lahore' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', city: 'islamabad' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const set = (k: keyof typeof form) => (v: string) => setForm((f) => ({ ...f, [k]: v }));
@@ -45,17 +48,14 @@ export default function Register() {
     const e: Record<string, string> = {};
     if (form.name.trim().length < 2) e.name = 'Please enter your full name.';
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim())) e.email = 'Enter a valid email address.';
-    if (form.password.length < 8 || !/\d/.test(form.password) || !/[A-Za-z]/.test(form.password)) e.password = 'Use 8+ characters with letters and numbers.';
+    if (form.password.length < 6 || !/\d/.test(form.password) || !/[A-Za-z]/.test(form.password)) e.password = 'Password must be at least 6 characters with letters and numbers.';
     setErrors(e);
     if (Object.keys(e).length) return;
     setLoading(true);
     try {
       const user = await register({ ...form, email: form.email.trim(), role });
       toast(`Welcome, ${user.name.split(' ')[0]}! Your account is ready.`);
-      router.replace(homeFor(user.role));
-      // New home owners go straight into the garden setup; they can skip it.
-      if (user.role === 'customer') setTimeout(() => router.push({ pathname: '/settings/garden', params: { onboarding: '1' } }), 350);
-      if (user.role !== 'customer' && user.role !== 'admin') setTimeout(() => router.push({ pathname: '/settings/professional', params: { onboarding: '1' } }), 350);
+      goHomeAfterSignUp(router, user);
     } catch (err: any) {
       setErrors({ form: err.message });
     } finally {
@@ -84,7 +84,9 @@ export default function Register() {
             );
           })}
         </View>
-        <Button title="Continue" iconRight="arrow-forward" onPress={() => setStep(2)} style={{ marginTop: 26 }} />
+        <Button title="Continue" iconRight="arrow-forward" onPress={() => setStep(2)} style={{ marginTop: 26, borderRadius: 999 }} />
+        <OrDivider />
+        <GoogleButton />
         <View style={styles.footer}>
           <T variant="body" color={colors.muted}>Already registered?</T>
           <Pressable onPress={() => router.replace('/login')} hitSlop={8}>
@@ -103,7 +105,7 @@ export default function Register() {
         <Input label="Phone (optional)" icon="call-outline" placeholder="+92 300 0000000" value={form.phone} onChangeText={set('phone')} keyboardType="phone-pad" />
         <CityField value={form.city} onChange={set('city')} />
         <View>
-          <Input label="Password" icon="lock-closed-outline" placeholder="At least 8 characters" value={form.password} onChangeText={set('password')} error={errors.password} secure />
+          <Input label="Password" icon="lock-closed-outline" placeholder="At least 6 characters" value={form.password} onChangeText={set('password')} error={errors.password} secure />
           {form.password.length > 0 && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10 }}>
               <View style={{ flexDirection: 'row', gap: 4, flex: 1 }}>
@@ -122,7 +124,7 @@ export default function Register() {
           <T variant="caption" color={colors.danger} style={{ flex: 1 }}>{errors.form}</T>
         </View>
       )}
-      <Button title="Create account" onPress={submit} loading={loading} style={{ marginTop: 26 }} />
+      <Button title="Create account" onPress={submit} loading={loading} style={{ marginTop: 26, borderRadius: 999 }} />
       <T variant="caption" center style={{ marginTop: 14 }}>By continuing you agree to our terms and privacy policy.</T>
     </AuthShell>
   );

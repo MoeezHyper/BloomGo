@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AuthShell } from '@/components/AuthShell';
+import { GoogleButton, OrDivider } from '@/components/GoogleButton';
 import { Button, Input, T, Tap } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
@@ -13,7 +14,8 @@ export default function Login() {
   const router = useRouter();
   const { signIn } = useAuth();
   const toast = useToast();
-  const [email, setEmail] = useState('');
+  const params = useLocalSearchParams<{ email?: string }>();
+  const [email, setEmail] = useState(params.email ?? '');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,11 +52,13 @@ export default function Login() {
         </View>
       )}
 
-      <Button title="Sign in" onPress={() => submit()} loading={loading} style={{ marginTop: 22 }} />
+      <Button title="Sign in" onPress={() => submit()} loading={loading} style={{ marginTop: 22, borderRadius: 999 }} />
+      <OrDivider />
+      <GoogleButton onError={setError} />
 
       <View style={styles.dividerRow}>
         <View style={styles.line} />
-        <T variant="eyebrow" color={colors.muted}>Demo accounts</T>
+        <T variant="eyebrow" color={colors.muted}>One-tap demo sign in</T>
         <View style={styles.line} />
       </View>
       <View style={styles.demoGrid}>
@@ -68,7 +72,9 @@ export default function Login() {
               submit(a.email, a.password);
             }}
           >
-            <Ionicons name={a.icon} size={18} color={colors.forest} />
+            <View style={styles.demoIconWrap}>
+              <Ionicons name={a.icon} size={17} color={colors.forest} />
+            </View>
             <View style={{ flex: 1 }}>
               <T style={{ fontFamily: fonts.semibold, fontSize: 13 }} color={colors.ink}>{a.label}</T>
               <T style={{ fontSize: 11, fontFamily: fonts.regular }} color={colors.muted} numberOfLines={1}>{a.email}</T>
@@ -92,6 +98,7 @@ const styles = StyleSheet.create({
   dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 30, marginBottom: 14 },
   line: { flex: 1, height: 1, backgroundColor: colors.line },
   demoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  demo: { width: '48.4%', flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: radius.md, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line },
+  demo: { width: '48.4%', flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 16, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.line },
+  demoIconWrap: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.sageSoft, alignItems: 'center', justifyContent: 'center' },
   footer: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: 28 },
 });

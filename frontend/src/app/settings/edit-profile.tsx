@@ -18,7 +18,7 @@ export default function EditProfile() {
   const { user, setUser } = useAuth();
   const [name, setName] = useState(user?.name ?? '');
   const [phone, setPhone] = useState(user?.phone ?? '');
-  const [city, setCity] = useState(user?.city ?? 'lahore');
+  const [city, setCity] = useState(user?.city ?? 'islamabad');
   const [avatarColor, setAvatarColor] = useState(user?.avatarColor ?? AVATAR_COLORS[0]!);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

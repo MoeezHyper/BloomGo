@@ -51,6 +51,7 @@ function scoreFlower(flower, city, month, garden) {
   const [sun, sunReason] = indoor ? (flower.indoor ? [25, 'Made for bright indoor rooms'] : [4, null]) : sunScore(flower.sunlight, g.sunlight);
   score += sun;
   if (sunReason) reasons.push(sunReason);
+  else if (indoor) warnings.push('An outdoor plant — needs more light than a room gives');
   else if (sun < 10) warnings.push(flower.sunlight === 'full' ? 'Needs more direct sun than your space gets' : 'Prefers more shade than your space offers');
 
   if (flower.spaces.includes(g.spaceType)) {
@@ -58,7 +59,8 @@ function scoreFlower(flower, city, month, garden) {
     reasons.push(`Grows well ${SPACE_WHERE[g.spaceType]}`);
   } else if (flower.potFriendly && g.spaceType !== 'indoor') {
     score += 10;
-  } else {
+  } else if (!indoor) {
+    // Indoors this is already covered by the light warning above.
     warnings.push(`Not ideal ${SPACE_WHERE[g.spaceType]}`);
   }
   if (g.size === 'small' && flower.heightCm > 150) {

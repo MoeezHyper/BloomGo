@@ -19,7 +19,7 @@ export default function CalendarScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const params = useLocalSearchParams<{ city?: string }>();
-  const [city, setCity] = useState(params.city ?? user?.garden?.city ?? user?.city ?? 'lahore');
+  const [city, setCity] = useState(params.city ?? user?.garden?.city ?? user?.city ?? 'islamabad');
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [mode, setMode] = useState<'bloom' | 'sow'>('bloom');
   const [pick, setPick] = useState(false);

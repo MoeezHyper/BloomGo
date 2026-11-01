@@ -43,7 +43,8 @@
         {
           "locationWhenInUsePermission": "Allow Smart Home Gardening to find flowers suited to your city."
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "scheme": "smarthomegardening",
     "backgroundColor": "#FAF7F0"

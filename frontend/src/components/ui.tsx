@@ -162,15 +162,26 @@ export function Input({
   error,
   secure,
   style,
+  inputStyle,
   right,
+  pill,
   ...rest
-}: TextInputProps & { label?: string; icon?: IconName; error?: string | null; secure?: boolean; right?: ReactNode }) {
+}: TextInputProps & { label?: string; icon?: IconName; error?: string | null; secure?: boolean; right?: ReactNode; inputStyle?: StyleProp<ViewStyle>; pill?: boolean }) {
   const [focused, setFocused] = useState(false);
   const [hidden, setHidden] = useState(!!secure);
   return (
     <View style={style}>
       {label && <T variant="label" style={{ marginBottom: 8 }}>{label}</T>}
-      <View style={[styles.input, focused && styles.inputFocused, !!error && { borderColor: colors.danger }, rest.multiline && { height: undefined, minHeight: 104, alignItems: 'flex-start', paddingVertical: 14 }]}>
+      <View
+        style={[
+          styles.input,
+          pill && { borderRadius: radius.pill, height: 48, paddingHorizontal: 18 },
+          focused && styles.inputFocused,
+          !!error && { borderColor: colors.danger },
+          rest.multiline && { height: undefined, minHeight: 104, alignItems: 'flex-start', paddingVertical: 14 },
+          inputStyle,
+        ]}
+      >
         {icon && <Ionicons name={icon} size={19} color={focused ? colors.forest : colors.faint} style={rest.multiline ? { marginTop: 2 } : undefined} />}
         <TextInput
           placeholderTextColor={colors.faint}

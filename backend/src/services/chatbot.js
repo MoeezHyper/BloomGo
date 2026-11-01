@@ -126,8 +126,8 @@ function answerForFlower(f, intents, text, city) {
 function reply({ message, context = {}, user }) {
   const text = norm(message || '');
   const intents = detectIntents(text);
-  const cityId = user?.garden?.city || user?.city || 'lahore';
-  const city = cityById(cityId) || cityById('lahore');
+  const cityId = user?.garden?.city || user?.city || 'islamabad';
+  const city = cityById(cityId) || cityById('islamabad');
   const mentioned = findFlower(text);
   const flower = mentioned || (context.flowerSlug ? flowerBySlug(context.flowerSlug) : null);
   const firstName = user?.name?.split(' ')[0];

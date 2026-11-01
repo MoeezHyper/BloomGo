@@ -18,7 +18,7 @@ function load() {
     console.log('[db] Created new database with demo accounts at', DB_FILE);
   }
   state.users ||= [];
-  state.resetCodes ||= [];
+  delete state.resetCodes; // replaced by Firebase password reset emails
   return state;
 }
 

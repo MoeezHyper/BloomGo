@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../db');
+const { auth } = require('../firebase');
 const { requireAuth, requireRole } = require('../middleware/auth');
 const { publicUser, ROLES } = require('../utils');
 const { FLOWERS, flowerBySlug } = require('../data/flowers');
@@ -48,13 +49,18 @@ router.get('/users/:id', (req, res) => {
   res.json({ user: publicUser(u) });
 });
 
-router.patch('/users/:id', (req, res) => {
+router.patch('/users/:id', async (req, res) => {
   const u = db.data.users.find((x) => x.id === req.params.id);
   if (!u) return res.status(404).json({ error: 'User not found.' });
   if (u.id === req.user.id) return res.status(400).json({ error: 'You cannot change your own admin account here.' });
   const { status, role } = req.body;
   if (status !== undefined) {
     if (!['active', 'suspended'].includes(status)) return res.status(400).json({ error: 'Invalid status.' });
+    if (u.uid) {
+      // Disabled Firebase accounts can't sign in; revoking ends existing sessions.
+      await auth.updateUser(u.uid, { disabled: status === 'suspended' });
+      if (status === 'suspended') await auth.revokeRefreshTokens(u.uid);
+    }
     u.status = status;
   }
   if (role !== undefined) {

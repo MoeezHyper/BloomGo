@@ -24,7 +24,7 @@ export default function ProfessionalProfile() {
   const p = user?.professional;
   const kind = user?.role === 'decorator' ? 'decorator' : 'gardener';
   const [skills, setSkills] = useState<string[]>(p?.skills ?? []);
-  const [areas, setAreas] = useState<string[]>(p?.serviceAreas ?? [user?.city ?? 'lahore']);
+  const [areas, setAreas] = useState<string[]>(p?.serviceAreas ?? [user?.city ?? 'islamabad']);
   const [days, setDays] = useState<string[]>(p?.availableDays ?? []);
   const [hours, setHours] = useState(p?.hours ?? '');
   const [years, setYears] = useState(p?.experienceYears ? String(p.experienceYears) : '');

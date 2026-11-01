@@ -106,7 +106,7 @@ export default function ProfileScreen() {
         <View style={styles.footer}>
           <Ionicons name="leaf" size={16} color={colors.faint} />
           <T variant="caption" center style={{ marginTop: 6 }}>{APP_NAME}</T>
-          <T variant="caption" center style={{ fontSize: 11 }}>Version 1.0 · Final Year Project</T>
+          <T variant="caption" center style={{ fontSize: 11 }}>Version 1.0</T>
         </View>
       </Gutter>
     </Page>

@@ -1,5 +1,6 @@
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
+import { auth } from './firebase';
 
 const PORT = 4000;
 
@@ -15,10 +16,6 @@ function resolveBaseUrl() {
 
 export const API_URL = resolveBaseUrl();
 
-let authToken: string | null = null;
-export const setAuthToken = (t: string | null) => {
-  authToken = t;
-};
 
 export class ApiError extends Error {
   status: number;
@@ -39,6 +36,8 @@ export async function api<T = any>(path: string, { method = 'GET', body, query }
       .join('&');
     if (qs) url += `?${qs}`;
   }
+  // Firebase refreshes the hour-long ID token automatically when needed.
+  const token = await auth.currentUser?.getIdToken().catch(() => null);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 12000);
   let res: Response;
@@ -47,7 +46,7 @@ export async function api<T = any>(path: string, { method = 'GET', body, query }
       method,
       headers: {
         'Content-Type': 'application/json',
-        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: body ? JSON.stringify(body) : undefined,
       signal: controller.signal,

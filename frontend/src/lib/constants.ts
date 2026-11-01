@@ -24,7 +24,7 @@ export const CITIES = [
   { id: 'gilgit', name: 'Gilgit' },
   { id: 'gwadar', name: 'Gwadar' },
 ];
-export const cityName = (id?: string | null) => CITIES.find((c) => c.id === id)?.name ?? 'Lahore';
+export const cityName = (id?: string | null) => CITIES.find((c) => c.id === id)?.name ?? 'Islamabad';
 
 export const ROLE_META: Record<Role, { label: string; blurb: string; icon: IconName; tint: string }> = {
   customer: { label: 'Home owner', blurb: 'Grow, care and decorate at home', icon: 'home-outline', tint: '#DDE8DA' },
@@ -68,10 +68,10 @@ export const COLOR_SWATCH: Record<string, string> = {
 export const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 export const DEMO_ACCOUNTS = [
-  { label: 'Home owner', email: 'sara@demo.com', password: 'Demo@123', icon: 'home-outline' as IconName },
-  { label: 'Gardener', email: 'ali@demo.com', password: 'Demo@123', icon: 'leaf-outline' as IconName },
-  { label: 'Decorator', email: 'hina@demo.com', password: 'Demo@123', icon: 'sparkles-outline' as IconName },
-  { label: 'Admin', email: 'admin@shgds.app', password: 'Admin@123', icon: 'shield-checkmark-outline' as IconName },
+  { label: 'Home owner', email: 'sara@demo.com', password: 'Demo12', icon: 'home-outline' as IconName },
+  { label: 'Gardener', email: 'ali@demo.com', password: 'Demo12', icon: 'leaf-outline' as IconName },
+  { label: 'Decorator', email: 'hina@demo.com', password: 'Demo12', icon: 'sparkles-outline' as IconName },
+  { label: 'Admin', email: 'admin@shgds.app', password: 'Admin1', icon: 'shield-checkmark-outline' as IconName },
 ];
 
 export const homeFor = (role: Role) => (role === 'customer' ? '/customer' : role === 'admin' ? '/admin' : '/pro');

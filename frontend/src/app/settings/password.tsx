@@ -3,13 +3,14 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { Gutter, Page, TopBar } from '@/components/layout';
 import { Button, Input, T } from '@/components/ui';
+import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
-import { api } from '@/lib/api';
 import { colors } from '@/theme';
 
 export default function ChangePassword() {
   const router = useRouter();
   const toast = useToast();
+  const { changePassword } = useAuth();
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -17,11 +18,14 @@ export default function ChangePassword() {
   const [saving, setSaving] = useState(false);
 
   async function save() {
+    if (next.length < 6 || !/\d/.test(next) || !/[A-Za-z]/.test(next)) {
+      return setError('Password must be at least 6 characters with letters and numbers.');
+    }
     if (next !== confirm) return setError('New passwords do not match.');
     setSaving(true);
     setError(null);
     try {
-      await api('/auth/change-password', { method: 'POST', body: { currentPassword: current, newPassword: next } });
+      await changePassword(current, next);
       toast('Password changed');
       router.back();
     } catch (e: any) {
@@ -35,7 +39,7 @@ export default function ChangePassword() {
     <Page keyboard>
       <TopBar title="Change password" />
       <Gutter>
-        <T variant="body" color={colors.muted}>Use at least 8 characters with a mix of letters and numbers.</T>
+        <T variant="body" color={colors.muted}>Use at least 6 characters with a mix of letters and numbers.</T>
         <View style={{ gap: 16, marginTop: 20 }}>
           <Input label="Current password" icon="lock-closed-outline" value={current} onChangeText={setCurrent} secure />
           <Input label="New password" icon="key-outline" value={next} onChangeText={setNext} secure />
